@@ -110,18 +110,18 @@ namespace Chireiden.Mislethal
                 }
                 numVargothRange = numVargothRange.Select(n => n * damagePerSpell).ToArray();
                 Console.WriteLine($"Damage Possibilities: {string.Join(", ", numVargothRange)} ({numVargoth * damagePerSpell})");
-                return numVargoth * damagePerSpell;
+                return (damagePerSpell != 9)
+                    ? (numVargoth * damagePerSpell) - Utils.EnemyMinions.Sum(e => e.Health)
+                    : ((numVargoth * 3) - Utils.EnemyMinions.Sum(e => (int) Math.Ceiling(e.Health / 3.0))) * 3;
             }
         }
 
         // No idea how to match.
         public override double Match(string[] deck)
         {
-            Console.WriteLine("Match: " + string.Join(", ", deck));
             var prob = 0.0;
             if (!deck.Contains(Quest) || !deck.Contains(Vargoth))
             {
-                Console.WriteLine($"deck.Contains(Quest)=>{deck.Contains(Quest)}, deck.Contains(Vargoth)=>{deck.Contains(Vargoth)}");
                 return 0;
             }
             if (deck.Contains(Drakkari))

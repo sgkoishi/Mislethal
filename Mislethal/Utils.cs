@@ -2,11 +2,17 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Linq;
+using Hearthstone_Deck_Tracker;
+using System.Collections.Generic;
+using Hearthstone_Deck_Tracker.Hearthstone.Entities;
 
 namespace Chireiden.Mislethal
 {
     public static class Utils
     {
+        public static List<Entity> FriendlyMinions => Core.Game.Player.Board.Where(e => !e.IsHero).ToList();
+        public static List<Entity> EnemyMinions => Core.Game.Opponent.Board.Where(e => !e.IsHero).ToList();
+
         public static int ToMill(this int draws, int remain)
         {
             return draws > remain ? (draws - remain) * (draws - remain + 1) / 2 : 0;

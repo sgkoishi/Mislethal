@@ -36,9 +36,9 @@ namespace Chireiden.Mislethal
 
         public void OnLoad()
         {
+            this.Combos.Add(new VargothThreeTurnKillMage());
             GameEvents.OnGameStart.Add(this.OnGameStart);
             GameEvents.OnPlayerDraw.Add(this.OnPlayerDraw);
-            this.Combos.Add(new VargothThreeTurnKillMage());
             Utils.ToggleConsole();
         }
 
@@ -55,6 +55,7 @@ namespace Chireiden.Mislethal
                     this.Current = combo;
                 }
             }
+            Console.WriteLine($"Deck detection: {this.Current.Name} ({match})");
         }
 
         private void OnPlayerDraw(Card obj)
@@ -64,7 +65,6 @@ namespace Chireiden.Mislethal
                 return;
             }
             var hand = Core.Game.Player.Hand.Select(c => c.CardId).ToArray();
-            Console.WriteLine(string.Join(", ", hand));
             var damage = this.Current.Damage(hand);
             var opponent = Core.Game.Opponent.Board.First(e => e.IsHero);
             var health = opponent.Health + opponent.GetTag(GameTag.ARMOR);
@@ -80,6 +80,7 @@ namespace Chireiden.Mislethal
 
         public void OnUpdate()
         {
+            // Render something here?
         }
     }
 }
