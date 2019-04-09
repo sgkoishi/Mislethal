@@ -73,6 +73,10 @@ namespace Chireiden.Mislethal
                 return;
             }
             var damage = this.Current.Damage();
+            if (!Core.Game.IsRunning)
+            {
+                return;
+            }
             var opponent = Core.Game.Opponent.Board.First(e => e.IsHero);
             var health = opponent.Health + opponent.GetTag(GameTag.ARMOR);
             if (damage.Lethal > health && this.Lethal != damage.Lethal)
