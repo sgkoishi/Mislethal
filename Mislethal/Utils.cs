@@ -1,17 +1,35 @@
-﻿using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Linq;
-using Hearthstone_Deck_Tracker;
-using System.Collections.Generic;
+﻿using Hearthstone_Deck_Tracker;
+using Hearthstone_Deck_Tracker.Hearthstone;
 using Hearthstone_Deck_Tracker.Hearthstone.Entities;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Chireiden.Mislethal
 {
     public static class Utils
     {
-        public static List<Entity> FriendlyMinions => Core.Game.Player.Board.Where(e => !e.IsHero).ToList();
-        public static List<Entity> EnemyMinions => Core.Game.Opponent.Board.Where(e => !e.IsHero).ToList();
+        public static Card First(this List<Card> cards, string target)
+        {
+            return cards.Where(c => c.Id == target).First();
+        }
+
+        public static List<Card> Of(this List<Card> cards, string target)
+        {
+            return cards.Where(c => c.Id == target).ToList();
+        }
+
+        public static bool Contains(this List<Card> cards, string target)
+        {
+            return cards.Any(c => c.Id == target);
+        }
+
+        public static int Count(this List<Card> source, string target)
+        {
+            return source.Count(c => c.Id == target);
+        }
 
         public static int ToMill(this int draws, int remain)
         {
@@ -21,11 +39,6 @@ namespace Chireiden.Mislethal
         public static int[] ToMill(this int[] draws, int remain)
         {
             return draws.Select(d => d.ToMill(remain)).ToArray();
-        }
-
-        public static int Count(this string[] source, string target)
-        {
-            return source.Count(c => c == target);
         }
 
         [Conditional("DEBUG")]

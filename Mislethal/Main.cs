@@ -1,19 +1,17 @@
 ﻿using HearthDb.Enums;
 using Hearthstone_Deck_Tracker.API;
-using Hearthstone_Deck_Tracker.Enums;
-using Hearthstone_Deck_Tracker.Hearthstone;
-using Hearthstone_Deck_Tracker.Hearthstone.Entities;
 using Hearthstone_Deck_Tracker.Plugins;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Windows;
+using System.Reflection;
 
 namespace Chireiden.Mislethal
 {
     public class Main : IPlugin
     {
+        public static PlayerHelper Self = new PlayerHelper(true);
+        public static PlayerHelper Oppo = new PlayerHelper(false);
         public string Name => "Mislethal";
 
         public string Description => "Mislethal is a plugin for Combo decks.";
@@ -26,8 +24,9 @@ namespace Chireiden.Mislethal
 
         public System.Windows.Controls.MenuItem MenuItem => null;
 
-        private readonly List<Combo> Combos = new List<Combo>();
-        private Combo Current;
+        public readonly List<Combo> Combos = new List<Combo>();
+        public Combo Current;
+        public int Lethal;
 
         public void OnButtonPress()
         {
@@ -36,42 +35,31 @@ namespace Chireiden.Mislethal
 
         public void OnLoad()
         {
-            this.Combos.Add(new VargothThreeTurnKillMage());
+            foreach (var item in Assembly.GetExecutingAssembly().GetTypes())
+            {
+                if (item.IsSubclassOf(typeof(Combo)))
+                {
+                    this.Combos.Add((Combo) Activator.CreateInstance(item));
+                }
+            }
             GameEvents.OnGameStart.Add(this.OnGameStart);
-            GameEvents.OnPlayerDraw.Add(this.OnPlayerDraw);
             Utils.ToggleConsole();
         }
 
         private void OnGameStart()
         {
-            var deck = Core.Game.Player.PlayerCardList.Select(c => c.Id).ToArray();
             var match = 0.0;
             foreach (var combo in this.Combos)
             {
-                var cm = combo.Match(deck);
+                var cm = combo.Match();
                 if (cm > match)
                 {
                     match = cm;
                     this.Current = combo;
                 }
             }
-            Console.WriteLine($"Deck detection: {this.Current.Name} ({match})");
-        }
-
-        private void OnPlayerDraw(Card obj)
-        {
-            if (this.Current == null)
-            {
-                return;
-            }
-            var hand = Core.Game.Player.Hand.Select(c => c.CardId).ToArray();
-            var damage = this.Current.Damage(hand);
-            var opponent = Core.Game.Opponent.Board.First(e => e.IsHero);
-            var health = opponent.Health + opponent.GetTag(GameTag.ARMOR);
-            if (damage > health)
-            {
-                Console.WriteLine($"Lethal found by {this.Current.Name}: Damage {damage} > Opponent Health {health}.");
-            }
+            this.Lethal = 0;
+            Console.WriteLine($"Deck detection: {this.Current?.Name ?? "Nothing"} ({match})");
         }
 
         public void OnUnload()
@@ -80,7 +68,21 @@ namespace Chireiden.Mislethal
 
         public void OnUpdate()
         {
-            // Render something here?
+            if (this.Current == null)
+            {
+                return;
+            }
+            var damage = this.Current.Damage();
+            var opponent = Core.Game.Opponent.Board.First(e => e.IsHero);
+            var health = opponent.Health + opponent.GetTag(GameTag.ARMOR);
+            if (damage.Lethal > health && this.Lethal != damage.Lethal)
+            {
+                this.Lethal = damage.Lethal;
+                Console.Clear();
+                Console.WriteLine($"Lethal found by {this.Current.Name}: Damage {damage.Lethal} > Opponent Health {health}.");
+                Console.WriteLine($"Action:\r\n    {damage.ToString("\r\n    ")}");
+                Console.WriteLine($"Message:\r\n    {damage.Message}");
+            }
         }
     }
 }
