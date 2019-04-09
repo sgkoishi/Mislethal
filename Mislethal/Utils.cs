@@ -13,7 +13,7 @@ namespace Chireiden.Mislethal
     {
         public static Card First(this List<Card> cards, string target)
         {
-            return cards.Where(c => c.Id == target).First();
+            return cards.First(c => c.Id == target);
         }
 
         public static List<Card> Of(this List<Card> cards, string target)
@@ -41,21 +41,6 @@ namespace Chireiden.Mislethal
             return draws.Select(d => d.ToMill(remain)).ToArray();
         }
 
-        [Conditional("DEBUG")]
-        public static void DebugRun(Action action)
-        {
-            action.Invoke();
-        }
-
-        [Conditional("DEBUG")]
-        public static void Write(string line)
-        {
-            if (Debugger.IsAttached)
-            {
-                Debugger.Log(1, "", line + "\r\n");
-            }
-        }
-
         private static int _consoleState = -1;
 
         public static void ToggleConsole()
@@ -68,7 +53,6 @@ namespace Chireiden.Mislethal
                     e.Cancel = true;
                     _consoleState = ConsoleMgr.Toggle(_consoleState);
                 };
-                Console.WriteLine("Console Init.");
                 EscHaltCheck();
                 _consoleState = 5;
             }
@@ -78,10 +62,8 @@ namespace Chireiden.Mislethal
             }
         }
 
-        [Conditional("DEBUG")]
         private static void EscHaltCheck()
         {
-            Console.WriteLine("[DEBUG] Enter q to quit (the HDT).");
             new System.Threading.Thread(() =>
             {
                 while (true)

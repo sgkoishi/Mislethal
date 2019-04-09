@@ -5,7 +5,6 @@ using System.Linq;
 
 namespace Chireiden.Mislethal
 {
-
     public abstract class Combo
     {
         public abstract string Name { get; }

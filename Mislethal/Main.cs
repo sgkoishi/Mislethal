@@ -20,13 +20,14 @@ namespace Chireiden.Mislethal
 
         public string Author => "SGKoishi";
 
-        public Version Version => new Version(1, 0, 0, 0);
+        public Version Version => new Version(0, 1, 1, 0);
 
         public System.Windows.Controls.MenuItem MenuItem => null;
 
         public readonly List<Combo> Combos = new List<Combo>();
         public Combo Current;
         public int Lethal;
+        private string _message;
 
         public void OnButtonPress()
         {
@@ -58,7 +59,7 @@ namespace Chireiden.Mislethal
                     this.Current = combo;
                 }
             }
-            this.Lethal = 0;
+            this.Lethal = -1;
             Console.WriteLine($"Deck detection: {this.Current?.Name ?? "Nothing"} ({match})");
         }
 
@@ -82,15 +83,28 @@ namespace Chireiden.Mislethal
             {
                 return;
             }
-            var opponent = opponentHero.First();
-            var health = opponent.Health + opponent.GetTag(GameTag.ARMOR);
-            if (damage.Lethal > health && this.Lethal != damage.Lethal)
+            if (damage.Lethal > this.Lethal)
             {
-                this.Lethal = damage.Lethal;
-                Console.Clear();
-                Console.WriteLine($"Lethal found by {this.Current.Name}: Damage {damage.Lethal} > Opponent Health {health}.");
-                Console.WriteLine($"Action:\r\n    {damage.ToString("\r\n    ")}");
-                Console.WriteLine($"Message:\r\n    {damage.Message}");
+                var opponent = opponentHero.First();
+                var health = opponent.Health + opponent.GetTag(GameTag.ARMOR);
+                var message = $"Current Deck: {this.Current.Name}\r\n";
+                if (damage.Lethal > health && this.Lethal != damage.Lethal && damage.Lethal > 0 && health > 0)
+                {
+                    this.Lethal = damage.Lethal;
+                    message = @$"Lethal found by {this.Current.Name}: Damage {damage.Lethal} > Opponent Health {health}.
+Action:
+    {damage.ToString("\r\n    ")}
+";
+                }
+                message += @$"Message:
+    {damage.Message}
+";
+                if (this._message != message)
+                {
+                    Console.Clear();
+                    this._message = message;
+                    Console.WriteLine(this._message);
+                }
             }
         }
     }

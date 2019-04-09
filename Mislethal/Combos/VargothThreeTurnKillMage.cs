@@ -89,7 +89,8 @@ namespace Chireiden.Mislethal.Combos
                 action.Add(new GameAction(ActionType.EndTurn));
                 return new ComboAction(numVargoth.ToMill(Core.Game.Opponent.DeckCount - 1), action)
                 {
-                    Message = $"Draw Possibilities: {string.Join(", ", numVargothRange)} ({numVargoth})\r\nEstimate Damage: {string.Join(", ", numVargothRange.ToMill(Core.Game.Opponent.DeckCount - 1))} ({numVargoth.ToMill(Core.Game.Opponent.DeckCount - 1)})"
+                    Message = @$"Draw Possibilities: {string.Join(", ", numVargothRange)} ({numVargoth})
+    Estimate Damage: {string.Join(", ", numVargothRange.ToMill(Core.Game.Opponent.DeckCount))} ({numVargoth.ToMill(Core.Game.Opponent.DeckCount)})"
                 };
             }
             else
@@ -136,11 +137,12 @@ namespace Chireiden.Mislethal.Combos
                 action.Add(new GameAction(ActionType.Play, damageSpell));
                 action.Add(new GameAction(ActionType.EndTurn));
                 numVargothRange = numVargothRange.Select(n => n * damagePerSpell).ToArray();
-                return new ComboAction(damagePerSpell != 9
-                    ? (numVargoth * damagePerSpell) - Main.Oppo.Board.Sum(e => e.Health)
-                    : ((numVargoth * 3) - Main.Oppo.Board.Sum(e => (int) Math.Ceiling(e.Health / 3.0))) * 3, action)
+                var enemyBoard = damagePerSpell == 9
+                    ? Main.Oppo.Board.Sum(e => 3 * (int) Math.Ceiling(e.Health / 3.0))
+                    : Main.Oppo.Board.Sum(e => e.Health);
+                return new ComboAction((numVargoth * damagePerSpell) - enemyBoard, action)
                 {
-                    Message = $"Damage Possibilities: {string.Join(", ", numVargothRange)} ({numVargoth * damagePerSpell})"
+                    Message = $"Damage Possibilities: {string.Join(", ", numVargothRange)} ({numVargoth * damagePerSpell} - {enemyBoard})"
                 };
             }
         }
