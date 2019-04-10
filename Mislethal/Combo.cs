@@ -1,9 +1,4 @@
-﻿using Hearthstone_Deck_Tracker;
-using Hearthstone_Deck_Tracker.Hearthstone;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Chireiden.Mislethal
+﻿namespace Chireiden.Mislethal
 {
     public abstract class Combo
     {

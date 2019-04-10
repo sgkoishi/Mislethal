@@ -24,12 +24,12 @@ namespace Chireiden.Mislethal.Combos
         {
             if (!Main.Self.Hand.Contains(Vargoth))
             {
-                return new ComboAction(0) { Message = "Vargoth missing." };
+                return new ComboAction(-3) { Message = "Vargoth missing." };
             }
 
             if (!Main.Self.Hand.Contains(TimeWrap))
             {
-                return new ComboAction(0) { Message = "Time Wrap missing." };
+                return new ComboAction(-2) { Message = "Time Wrap missing." };
             }
 
             var damagePerSpell = 0;
@@ -52,7 +52,7 @@ namespace Chireiden.Mislethal.Combos
             var useMill = Main.Self.Hand.Contains(MageCards.ResearchProject) && Main.Self.Hand.Contains(NeutralCards.VioletIllusionist);
             if (damagePerSpell == 0 && !useMill)
             {
-                return new ComboAction(0) { Message = "Damage spell, Research Project and Violet Illusionist missing." };
+                return new ComboAction(-1) { Message = "Damage spell, Research Project and Violet Illusionist missing." };
             }
 
             var doubleMolten = Main.Self.Hand.Count(MoltenReflection) > 1;
@@ -71,6 +71,7 @@ namespace Chireiden.Mislethal.Combos
                 action.Add(new GameAction(ActionType.PlayTarget, Main.Self.Hand.First(MoltenReflection), Main.Self.Hand.First(Vargoth)));
             }
             action.Add(new GameAction(ActionType.EndTurn));
+            var estDamage = 0;
             if (useMill)
             {
                 action.Add(new GameAction(ActionType.Play, Main.Self.Hand.First(NeutralCards.VioletIllusionist)));
@@ -87,10 +88,11 @@ namespace Chireiden.Mislethal.Combos
                 }
                 action.Add(new GameAction(ActionType.Play, Main.Self.Hand.First(MageCards.ResearchProject)));
                 action.Add(new GameAction(ActionType.EndTurn));
-                return new ComboAction(numVargoth.ToMill(Core.Game.Opponent.DeckCount - 1), action)
+                estDamage = numVargoth.ToMill(Core.Game.Opponent.DeckCount);
+                return new ComboAction(estDamage, action)
                 {
                     Message = @$"Draw Possibilities: {string.Join(", ", numVargothRange)} ({numVargoth})
-    Estimate Damage: {string.Join(", ", numVargothRange.ToMill(Core.Game.Opponent.DeckCount))} ({numVargoth.ToMill(Core.Game.Opponent.DeckCount)})"
+    Estimate Damage: {string.Join(", ", numVargothRange.ToMill(Core.Game.Opponent.DeckCount))} ({estDamage})"
                 };
             }
             else
@@ -140,7 +142,8 @@ namespace Chireiden.Mislethal.Combos
                 var enemyBoard = damagePerSpell == 9
                     ? Main.Oppo.Board.Sum(e => 3 * (int) Math.Ceiling(e.Health / 3.0))
                     : Main.Oppo.Board.Sum(e => e.Health);
-                return new ComboAction((numVargoth * damagePerSpell) - enemyBoard, action)
+                estDamage = (numVargoth * damagePerSpell) - enemyBoard;
+                return new ComboAction(estDamage, action)
                 {
                     Message = $"Damage Possibilities: {string.Join(", ", numVargothRange)} ({numVargoth * damagePerSpell} - {enemyBoard})"
                 };

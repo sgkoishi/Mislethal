@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Chireiden.Mislethal
 {
@@ -16,22 +19,23 @@ namespace Chireiden.Mislethal
 
         public string Description => "Mislethal is a plugin for Combo decks.";
 
-        public string ButtonText => "Open / Close Log Window";
+        public string ButtonText => "No";
 
         public string Author => "SGKoishi";
 
-        public Version Version => new Version(0, 1, 1, 0);
+        public Version Version => new Version(0, 1, 2, 0);
 
-        public System.Windows.Controls.MenuItem MenuItem => null;
+        public MenuItem MenuItem => null;
 
         public readonly List<Combo> Combos = new List<Combo>();
+        private readonly Label label = new Label();
         public Combo Current;
         public int Lethal;
         private string _message;
 
         public void OnButtonPress()
         {
-            Utils.ToggleConsole();
+            this.label.Visibility = (this.label.Visibility == Visibility.Visible) ? Visibility.Hidden : Visibility.Visible;
         }
 
         public void OnLoad()
@@ -44,7 +48,19 @@ namespace Chireiden.Mislethal
                 }
             }
             GameEvents.OnGameStart.Add(this.OnGameStart);
-            Utils.ToggleConsole();
+            GameEvents.OnGameEnd.Add(this.OnGameEnd);
+            Core.OverlayCanvas.Children.Add(this.label);
+            this.label.FontSize = 16;
+            this.label.Content = "";
+            this.label.FontWeight = FontWeights.Bold;
+            this.label.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 127));
+        }
+
+        private void OnGameEnd()
+        {
+            this.Lethal = -1;
+            this._message = "";
+            this.label.Content = this._message;
         }
 
         private void OnGameStart()
@@ -60,7 +76,6 @@ namespace Chireiden.Mislethal
                 }
             }
             this.Lethal = -1;
-            Console.WriteLine($"Deck detection: {this.Current?.Name ?? "Nothing"} ({match})");
         }
 
         public void OnUnload()
@@ -73,7 +88,6 @@ namespace Chireiden.Mislethal
             {
                 return;
             }
-            var damage = this.Current.Damage();
             if (Core.Game.IsInMenu)
             {
                 return;
@@ -83,28 +97,29 @@ namespace Chireiden.Mislethal
             {
                 return;
             }
-            if (damage.Lethal > this.Lethal)
+            var damage = this.Current.Damage();
+            if (damage.Lethal < 0 && this.Lethal > 0)
             {
-                var opponent = opponentHero.First();
-                var health = opponent.Health + opponent.GetTag(GameTag.ARMOR);
-                var message = $"Current Deck: {this.Current.Name}\r\n";
-                if (damage.Lethal > health && this.Lethal != damage.Lethal && damage.Lethal > 0 && health > 0)
-                {
-                    this.Lethal = damage.Lethal;
-                    message = @$"Lethal found by {this.Current.Name}: Damage {damage.Lethal} > Opponent Health {health}.
+                return;
+            }
+            var opponent = opponentHero.First();
+            var health = opponent.Health + opponent.GetTag(GameTag.ARMOR);
+            var message = $"Deck detection: {this.Current?.Name ?? "Nothing"} ({this.Current.Match()})\r\n";
+            if (damage.Lethal > health && damage.Lethal > 0 && health > 0)
+            {
+                this.Lethal = damage.Lethal;
+                message = @$"Lethal found by {this.Current.Name}: Damage {damage.Lethal} - Opponent Health {health} = {damage.Lethal - health}.
 Action:
     {damage.ToString("\r\n    ")}
 ";
-                }
-                message += @$"Message:
+            }
+            message += @$"Message:
     {damage.Message}
 ";
-                if (this._message != message)
-                {
-                    Console.Clear();
-                    this._message = message;
-                    Console.WriteLine(this._message);
-                }
+            if (this._message != message)
+            {
+                this._message = message;
+                this.label.Content = this._message;
             }
         }
     }
