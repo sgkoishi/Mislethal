@@ -24,12 +24,12 @@ namespace Chireiden.Mislethal.Combos
         {
             if (!Main.Self.Hand.Contains(Vargoth))
             {
-                return new ComboAction(-3) { Message = "Vargoth missing." };
+                return new ComboAction(-4) { Message = "Vargoth missing." };
             }
 
             if (!Main.Self.Hand.Contains(TimeWrap))
             {
-                return new ComboAction(-2) { Message = "Time Wrap missing." };
+                return new ComboAction(-3) { Message = "Time Wrap missing." };
             }
 
             var damagePerSpell = 0;
@@ -52,10 +52,14 @@ namespace Chireiden.Mislethal.Combos
             var useMill = Main.Self.Hand.Contains(MageCards.ResearchProject) && Main.Self.Hand.Contains(NeutralCards.VioletIllusionist);
             if (damagePerSpell == 0 && !useMill)
             {
-                return new ComboAction(-1) { Message = "Damage spell, Research Project and Violet Illusionist missing." };
+                return new ComboAction(-2) { Message = "Damage spell, Research Project and Violet Illusionist missing." };
             }
-
-            var doubleMolten = Main.Self.Hand.Count(MoltenReflection) > 1;
+            var numMolten = Main.Self.Hand.Count(MoltenReflection);
+            if (numMolten == 0)
+            {
+                return new ComboAction(-1) { Message = "Molten Reflection missing." };
+            }
+            var doubleMolten = numMolten > 1;
             var hasDrakkari = Main.Self.Hand.Contains(Drakkari);
             var numVargoth = 0;
             var numVargothRange = new int[] { 2, 3, 4, 5, 6 };

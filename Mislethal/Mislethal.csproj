@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <AssemblyVersion>0.1.3.0334</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -51,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComboAction.cs" />
+    <Compile Include="Combos\NoCombo.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Combo.cs" />
     <Compile Include="PlayerHelper.cs" />

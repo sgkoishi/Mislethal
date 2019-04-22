@@ -23,7 +23,7 @@ namespace Chireiden.Mislethal
 
         public string Author => "SGKoishi";
 
-        public Version Version => new Version(0, 1, 2, 0);
+        public Version Version => Assembly.GetExecutingAssembly().GetName().Version;
 
         public MenuItem MenuItem => null;
 
@@ -54,6 +54,8 @@ namespace Chireiden.Mislethal
             this.label.Content = "";
             this.label.FontWeight = FontWeights.Bold;
             this.label.Foreground = new SolidColorBrush(Color.FromRgb(0, 255, 127));
+            this.label.MouseEnter += (o, e) => this.label.Opacity = 0.1;
+            this.label.MouseLeave += (o, e) => this.label.Opacity = 1;
         }
 
         private void OnGameEnd()
